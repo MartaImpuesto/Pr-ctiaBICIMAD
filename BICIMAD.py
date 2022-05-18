@@ -10,15 +10,39 @@ from pprint import pprint
 from pyspark import SparkContext
 import datetime
 import sys
+import matplotlib.pyplot as plt
 
 
-def cargar_datos():
-    datos = []
-    for i in [1907, 1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]:
-        for line in open("20" + str(i) +"_movements.json", "r"):
-            datos.append(json.loads(line))
-    return datos
+# =============================================================================
+# def cargar_datos():
+#     datos = []
+#     for i in [1907, 1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]:
+#         for line in open("20" + str(i) +"_movements.json", "r"):
+#             datos.append(json.loads(line))
+#     return datos
+# =============================================================================
 
+def mapper(line):
+    data = json.loads(line)
+    date = data["unplug_hourTime"][0:7]
+    user_type = data["user_type"]
+    travel_time = data["travel_time"]
+    ageRange = data["ageRange"]
+    return date, user_type, travel_time, ageRange
+
+def main():
+    with SparkContext() as sc:
+        files = ["20"+str(i)+"_movements.json" for i in [1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]]
+        rddfile = sc.textFile(",".join(files)).map(mapper)
+        print(rddfile.countByKey().items())
+
+
+if __name__ == "__main__":
+    main()
+    
+    
+    
+    
 """
 def user_type(x):
     if x == 0:
