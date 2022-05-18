@@ -35,7 +35,8 @@ def main():
         files = ["20"+str(i)+"_movements.json" for i in [1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]]
         rddfile = sc.textFile(",".join(files)).map(mapper)
         print(rddfile.countByKey().items())
-
+        print(sorted(rddfile.map(lambda x: (x[0]+"-"+str(x[1]), x[1], x[2], x[3])).countByKey().items()))
+        print(sorted(rddfile.map(lambda x: (x[0]+"-"+str(x[3]), x[1], x[2], x[3])).countByKey().items()))
 
 if __name__ == "__main__":
     main()
