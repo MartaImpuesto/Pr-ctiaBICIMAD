@@ -13,15 +13,6 @@ import sys
 import matplotlib.pyplot as plt
 
 
-# =============================================================================
-# def cargar_datos():
-#     datos = []
-#     for i in [1907, 1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]:
-#         for line in open("20" + str(i) +"_movements.json", "r"):
-#             datos.append(json.loads(line))
-#     return datos
-# =============================================================================
-
 def mapper(line):
     data = json.loads(line)
     date = data["unplug_hourTime"][0:7]
@@ -29,45 +20,29 @@ def mapper(line):
     travel_time = data["travel_time"]
     ageRange = data["ageRange"]
     return date, user_type, travel_time, ageRange
-
+    
 def main():
     with SparkContext() as sc:
         files = ["20"+str(i)+"_movements.json" for i in [1908, 1909, 1910, 1911, 1912, 2001, 2002, 2003, 2004, 2005, 2006, 2007]]
-        rddfile = sc.textFile(",".join(files)).map(mapper)
-        print(rddfile.countByKey().items())
-        print(sorted(rddfile.map(lambda x: (x[0]+"-"+str(x[1]), x[1], x[2], x[3])).countByKey().items()))
-        print(sorted(rddfile.map(lambda x: (x[0]+"-"+str(x[3]), x[1], x[2], x[3])).countByKey().items()))
-
+        rdd = sc.textFile(",".join(files)).map(mapper)
+        cuenta_usos = dict(rdd.countByKey().items())
+        #cuenta_tipo_usuario = sorted(rdd.map(lambda x: (x[0], [1*(i==x[1]-1) for i in range(3)])).reduceByKey(lambda x, y: [x[i]+y[i] for i in range(3)]).collect())
+        #cuenta_años_usuario = sorted(rdd.map(lambda x: (x[0], [1*(i==x[3]) for i in range(7)])).reduceByKey(lambda x, y: [x[i]+y[i] for i in range(7)]).collect())
+        #media_tiempo = sorted(rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda x, y: x+y).map(lambda x: (x[0], x[1]/cuenta_usos[x[0]])).collect())
+        
+        
+        print(cuenta_usos)
+        #print(cuenta_tipo_usuario)
+        #print(cuenta_años_usuario)
+        #print(media_tiempo)
+        
+        fig, ax = plt.subplots()
+        ax.bar(cuenta_usos.keys(), cuenta_usos.values())
+        fig.show()
+        
 if __name__ == "__main__":
     main()
     
     
     
     
-"""
-def user_type(x):
-    if x == 0:
-        user = 'No se ha podido determinar el tipo de usuario'
-    elif x == 1:
-        user = 'Usuario anual (poseedor de un pase anual)'
-    elif x == 2:
-        user = 'Usuario ocasional'
-    elif x == 3:
-        user = 'Trabajador de la empresa'
-    return user
-
-def ageRange(y):
-    if y == 0:
-        rango_edad = 'No se ha podido determinar el rango de edad del usuario'
-    elif y == 1:
-        rango_edad = 'El usuario tiene entre 0 y 16 años'
-    elif y == 2:
-        rango_edad = 'El usuario tiene entre 17 y 18 años'
-    elif y == 3:
-        rango_edad = 'El usuario tiene entre 19 y 26 años'
-    elif y == 4:
-        rango_edad = 'El usuario tiene entre 27 y 40 años'
-    elif y == 5:
-        rango_edad = 'El usuario tiene 66 años o más'
-    return rango_edad
-"""
