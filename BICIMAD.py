@@ -55,6 +55,10 @@ def main():
         ax4.bar([cuenta_tipo_usuario_porcentaje[i][0] for i in range(12)], [cuenta_tipo_usuario_porcentaje[i][1][2] for i in range(12)])
         fig4.show()
         
+        fig5, ax5 = plt.subplots()
+        plt.xticks(size = 6)
+        ax5.bar([media_tiempo[i][0] for i in range(12)], [media_tiempo[i][1] for i in range(12)])
+        fig5.show()
         
         
 if __name__ == "__main__":
