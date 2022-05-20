@@ -30,13 +30,16 @@ def main():
         cuenta_usos = dict(rdd.countByKey().items())
         cuenta_tipo_usuario_porcentaje = sorted(rdd.map(lambda x: (x[0], [1*(i==x[1]-1) for i in range(3)])).reduceByKey(lambda x, y: [x[i]+y[i] for i in range(3)]).map(lambda x: (x[0], [x[1][i]/cuenta_usos[x[0]] for i in range(3)])).collect())
         media_tiempo = sorted(rdd.map(lambda x: (x[0], x[2])).reduceByKey(lambda x, y: x+y).map(lambda x: (x[0], x[1]/cuenta_usos[x[0]])).collect())
+        media_tiempo_sin_outliers = sorted(rdd.map(lambda x: (x[0], x[2])).filter(lambda x: x[1] < 10000).reduceByKey(lambda x, y: x+y).map(lambda x: (x[0], x[1]/cuenta_usos[x[0]])).collect())
         
-        
+        print()
         print(cuenta_usos)
         print()
         print(cuenta_tipo_usuario_porcentaje)
         print()
         print(media_tiempo)
+        print()
+        print(media_tiempo_sin_outliers)
         
         fig, ax = plt.subplots()
         plt.xticks(size = 6)
@@ -63,6 +66,10 @@ def main():
         ax5.bar([media_tiempo[i][0] for i in range(12)], [media_tiempo[i][1] for i in range(12)])
         fig5.show()
         
+        fig6, ax6 = plt.subplots()
+        plt.xticks(size = 6)
+        ax6.bar([media_tiempo_sin_outliers[i][0] for i in range(12)], [media_tiempo_sin_outliers[i][1] for i in range(12)])
+        fig6.show()
         
 if __name__ == "__main__":
     main()
